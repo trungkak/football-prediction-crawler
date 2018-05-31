@@ -25,4 +25,5 @@
     $ cd PredictionSpyder
     $ scrapy crawl oddsspider -o bet_odds.json -t json
     $ scrapy crawl winnerspider -o winner.json -t json
+    $ scarpy crawl keonhacaispider -o keonhacai.json -t json
 
