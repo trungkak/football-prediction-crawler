@@ -86,11 +86,21 @@ def get_google_winner(source, title):
 # Keo nha cai data
 
 def concat_row_data(sub_table):
-    result = []
-    for tr in sub_table.find('tbody').find_all('tr', recursive=False):
+    result = {}
+    names = ['team1', 'team2', 'draw']
+    for i, tr in enumerate(sub_table.find('tbody').find_all('tr', recursive=False)):
         tds = tr.find_all('td')
-        result.append([td.text for td in tds])
+        content = [td.text for td in tds if td.text.strip() != '']
+        if len(content) != 0:
+            result[names[i]] = content
     return result
+
+    # result = []
+    #
+    # for tr in sub_table.find('tbody').find_all('tr', recursive=False):
+    #     tds = tr.find_all('td')
+    #     result.append([td.text for td in tds])
+    # return result
 
 
 def parse_row(elem):

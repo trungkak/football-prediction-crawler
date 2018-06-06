@@ -86,13 +86,19 @@ class PredictionDataImport(object):
         print(merge_results)
 
     def import_keonhacai(self, keonhacai_data):
-        match_data = keonhacai_data['data']
+        match_data = keonhacai_data[0]['data']
 
-        for row in match_data:
-            team1 = row['MATCHNAME'][0][0]
-            team2 = row['MATCHNAME'][1][0]
+        worldcup_real_matches = [('Russia', 'Saudi Arabia'), ('egypt', 'uruguay'), ('morocco', 'iran'), ('portugal', 'spain')]
 
-            keonhacai_script = """CREATE (keonhacai_prediction:KEONHACAI_PREDICTION 
+        for i, team in enumerate(worldcup_real_matches):
+
+            row = match_data[i]
+            #team1 = row['MATCHNAME'][0][0]
+            #team2 = row['MATCHNAME'][1][0]
+            team1 = team[0]
+            team2 = team[1]
+
+            keonhacai_script = """CREATE (bet_odds_prediction:BET_ODDS_PREDICTION 
                             {
                                 team1: '%s', 
                                 team2: '%s', 
@@ -124,12 +130,12 @@ class PredictionDataImport(object):
 
         merge_script = """
                         MATCH (match:MATCH)-[:BELONG_TO]->(tournament:TOURNAMENT), 
-                                (keonhacai_prediction:KEONHACAI_PREDICTION) 
-                            WHERE   match.team1 = keonhacai_prediction.team1 
-                                AND match.team2 = keonhacai_prediction.team2 
+                                (bet_odds_prediction:BET_ODDS_PREDICTION) 
+                            WHERE   match.team1 = bet_odds_prediction.team1 
+                                AND match.team2 = bet_odds_prediction.team2 
                                 AND tournament.name =~ ".*2018.*" 
-                            CREATE (winner_prediction)-[:PREDICT]->(match) 
-                            RETURN winner_prediction,match
+                            CREATE (bet_odds_prediction)-[:PREDICT]->(match) 
+                            RETURN bet_odds_prediction, match
                     """
         try:
             merge_results = self.gdb.query(merge_script, data_contents=True)
@@ -143,9 +149,9 @@ if __name__ == '__main__':
     pi = PredictionDataImport("http://10.199.220.179:7474/", "neo4j", "123456")
     # pi = PredictionDataImport("http://localhost:7474/", "neo4j", "123456")
 
-    with open('../winner.json', 'r') as f:
-        data = json.loads(f.read())
-        pi.import_winner(data)
+    # with open('../winner.json', 'r') as f:
+    #     data = json.loads(f.read())
+    #     pi.import_winner(data)
 
     with open('../keonhacai.json', 'r') as f:
         data = json.loads(f.read())
