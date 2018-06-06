@@ -65,7 +65,7 @@ class OddsSpider(scrapy.Spider):
                 function main(splash)
                   assert(splash:go(splash.args.url))
 
-                  -- requires Splash 2.3  
+                  -- requires Splash 2.3    
                   while not splash:select('.highcharts-legend') do
                     splash:wait(0.1)
                   end

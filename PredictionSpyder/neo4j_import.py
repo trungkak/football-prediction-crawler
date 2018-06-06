@@ -85,16 +85,68 @@ class PredictionDataImport(object):
         merge_results = self.gdb.query(merge_script, data_contents=True)
         print(merge_results)
 
+    def import_keonhacai(self, keonhacai_data):
+        match_data = keonhacai_data['data']
+
+        for row in match_data:
+            team1 = row['MATCHNAME'][0][0]
+            team2 = row['MATCHNAME'][1][0]
+
+            keonhacai_script = """CREATE (keonhacai_prediction:KEONHACAI_PREDICTION 
+                            {
+                                team1: '%s', 
+                                team2: '%s', 
+                                matchtime: '%s',
+                                chance: '%s', 
+                                dice: '%s', 
+                                onextwo: '%s',
+                                firsthalf_chance: '%s',
+                                firsthalf_dice: '%s',
+                                firsthalf_onextwo: '%s'
+                            })
+                    """ % (team1.title(),
+                           team2.title(),
+                           row['DATETIME'],
+                           json.dumps(row['CATRAN-TYLE']),
+                           json.dumps(row['CATRAN-TAIXIU']),
+                           json.dumps(row['CATRAN-1X2']),
+                           json.dumps(row['HIEP1-TYLE']),
+                           json.dumps(row['HIEP1-TAIXIU']),
+                           json.dumps(row['HIEP1-1X2']),
+                           )
+
+            try:
+                create_result = self.gdb.query(keonhacai_script, data_contents=True)
+                print(create_result)
+                print("SUCCESSFULLY CREATE KEONHACAI_PREDICTION")
+            except Exception as e:
+                print(e)
+
+        merge_script = """
+                        MATCH (match:MATCH)-[:BELONG_TO]->(tournament:TOURNAMENT), 
+                                (keonhacai_prediction:KEONHACAI_PREDICTION) 
+                            WHERE   match.team1 = keonhacai_prediction.team1 
+                                AND match.team2 = keonhacai_prediction.team2 
+                                AND tournament.name =~ ".*2018.*" 
+                            CREATE (winner_prediction)-[:PREDICT]->(match) 
+                            RETURN winner_prediction,match
+                    """
+        try:
+            merge_results = self.gdb.query(merge_script, data_contents=True)
+            print(merge_results)
+            print("SUCCESSFULLY MERGE KEONHACAI_PREDICTION TO MATCH")
+        except Exception as e:
+            print(e)
+
 
 if __name__ == '__main__':
     pi = PredictionDataImport("http://10.199.220.179:7474/", "neo4j", "123456")
+    # pi = PredictionDataImport("http://localhost:7474/", "neo4j", "123456")
 
-    # with open('../winner.json', 'r') as f:
-    #     data = json.loads(f.read())
-    #     print(data)
-    #     pi.import_winner(data)
-
-    with open('../bet_odds.json', 'r') as f:
+    with open('../winner.json', 'r') as f:
         data = json.loads(f.read())
-        # print(data)
-        pi.import_bet_odds(data)
+        pi.import_winner(data)
+
+    with open('../keonhacai.json', 'r') as f:
+        data = json.loads(f.read())
+        pi.import_keonhacai(data)

@@ -71,6 +71,9 @@ class GoogleWinnerSpider(scrapy.Spider):
             end
     """
 
+    # Empty output file
+    f = open("winner.json", 'w').close()
+
     def start_requests(self):
         for match_name, url in self.matches.items():
             # yield scrapy.Request(url=url, callback=self.parse)

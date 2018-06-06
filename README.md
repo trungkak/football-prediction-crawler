@@ -22,8 +22,14 @@
 
 ### Running
 
+If you want to crawl winner prediction from google, you need to enable splash to render javascript
+    
     $ cd PredictionSpyder
-    $ scrapy crawl oddsspider -o bet_odds.json -t json
+    $ sudo docker run -p 8050:8050 -p 5023:5023 scrapinghub/splash
     $ scrapy crawl winnerspider -o winner.json -t json
-    $ scarpy crawl keonhacaispider -o keonhacai.json -t json
+
+Or just keonhacai prediction
+
+    $ cd PredictionSpyder
+    $ scrapy crawl keonhacaispider -o keonhacai.json -t json
 

@@ -1,6 +1,8 @@
 
 import pandas as pd
 from scrapy.selector import Selector
+from datetime import datetime
+from bs4 import BeautifulSoup
 
 
 def get_bet_odds(url_or_source, title):
@@ -75,9 +77,67 @@ def get_google_winner(source, title):
     winning_percents[team1] = team1_percent
     winning_percents['draw'] = draw_percent
     winning_percents[team2] = team2_percent
-
-    print(winning_percents)
+    winning_percents['first_team'] = team1
+    winning_percents['second_team'] = team2
 
     return winning_percents
 
 
+# Keo nha cai data
+
+def concat_row_data(sub_table):
+    result = []
+    for tr in sub_table.find('tbody').find_all('tr', recursive=False):
+        tds = tr.find_all('td')
+        result.append([td.text for td in tds])
+    return result
+
+
+def parse_row(elem):
+    COLUMN_NAMES = ['DATETIME',
+                    'MATCHNAME',
+                    'CATRAN-TYLE',
+                    'CATRAN-TAIXIU',
+                    'CATRAN-1X2',
+                    'HIEP1-TYLE',
+                    'HIEP1-TAIXIU',
+                    'HIEP1-1X2']
+
+    match_obj = {}
+    tds = elem.find_all('td', recursive=False)
+
+    for index, name in enumerate(COLUMN_NAMES):
+        td = tds[index]
+        if len(td.find_all('table')) == 0:
+            match_obj[name] = ' '.join(td.find_all(text=True))
+        else:
+            match_obj[name] = concat_row_data(td.find_all('table')[0])
+
+    return match_obj
+
+
+def get_keonhacai(source, key_term):
+    current_time = datetime.utcnow()
+    current_timestamp = datetime.fromtimestamp(float(current_time.timestamp())).strftime('%Y-%m-%d %H:%M:%S')
+
+    # get the main table
+    soup = BeautifulSoup(source, "lxml")
+    table = soup.find("table", id="dm3")
+
+    # get all table rows at first level
+    table_rows = table.find('tbody').find_all('tr', recursive=False)
+
+    # find the row contains key term and its index
+    key_term_row = list(filter(lambda elem: len(elem.find_all('td')) == 1 and elem.text.strip() == key_term, table_rows))[0]
+    key_term_row_index = table_rows.index(key_term_row)
+
+    # find the next row the contains a term
+    next_term_row = list(filter(lambda elem: len(elem.find_all('td')) == 1, table_rows[key_term_row_index + 1:]))[0]
+    next_term_row_index = table_rows.index(next_term_row)
+
+    match_data = {'timestamp': current_timestamp, 'data': []}
+
+    for match_row in table_rows[key_term_row_index + 1: next_term_row_index]:
+        match_data['data'].append(parse_row(match_row))
+
+    return match_data
