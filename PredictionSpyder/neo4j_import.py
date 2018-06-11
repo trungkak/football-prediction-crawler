@@ -86,7 +86,7 @@ class PredictionDataImport(object):
         print(merge_results)
 
     def import_keonhacai(self, keonhacai_data):
-        match_data = keonhacai_data[0]['data']
+        match_data = keonhacai_data['data']
 
         for row in match_data:
 
@@ -105,6 +105,27 @@ class PredictionDataImport(object):
                                 firsthalf_dice: '%s',
                                 firsthalf_onextwo: '%s'
                             })
+                    """ % (team1.title(),
+                           team2.title(),
+                           row['DATETIME'],
+                           json.dumps(row['CATRAN-TYLE']),
+                           json.dumps(row['CATRAN-TAIXIU']),
+                           json.dumps(row['CATRAN-1X2']),
+                           json.dumps(row['HIEP1-TYLE']),
+                           json.dumps(row['HIEP1-TAIXIU']),
+                           json.dumps(row['HIEP1-1X2']),
+                           )
+
+            update_script = """MATCH (bet_odds_prediction:BET_ODDS_PREDICTION)
+                            WHERE bet_odds_prediction.team1 = '%s' AND bet_odds_prediction.team2 = '%s' 
+                            SET
+                                bet_odds_prediction.chance = '%s',
+                                bet_odds_prediction.chance = '%s',
+                                bet_odds_prediction.dice = '%s',
+                                bet_odds_prediction.onextwo = '%s',
+                                bet_odds_prediction.firsthalf_chance = '%s',
+                                bet_odds_prediction.firsthalf_dice = '%s',
+                                bet_odds_prediction.firsthalf_onextwo = '%s'
                     """ % (team1.title(),
                            team2.title(),
                            row['DATETIME'],
@@ -168,6 +189,27 @@ class PredictionDataImport(object):
                            json.dumps(row['HIEP1-underover']),
                            json.dumps(row['HIEP1-onextwo']),
                            )
+
+            update_script = """MATCH (bet_odds_prediction:BET_ODDS_PREDICTION)
+                                        WHERE bet_odds_prediction.team1 = '%s' AND bet_odds_prediction.team2 = '%s' 
+                                        SET
+                                            bet_odds_prediction.chance = '%s',
+                                            bet_odds_prediction.chance = '%s',
+                                            bet_odds_prediction.dice = '%s',
+                                            bet_odds_prediction.onextwo = '%s',
+                                            bet_odds_prediction.firsthalf_chance = '%s',
+                                            bet_odds_prediction.firsthalf_dice = '%s',
+                                            bet_odds_prediction.firsthalf_onextwo = '%s'
+                                """ % (team1.title(),
+                                       team2.title(),
+                                       row['DATETIME'],
+                                       json.dumps(row['CATRAN-handicap']),
+                                       json.dumps(row['CATRAN-underover']),
+                                       json.dumps(row['CATRAN-onextwo']),
+                                       json.dumps(row['HIEP1-handicap']),
+                                       json.dumps(row['HIEP1-underover']),
+                                       json.dumps(row['HIEP1-onextwo']),
+                                       )
 
             try:
                 create_result = self.gdb.query(keonhacai_script, data_contents=True)

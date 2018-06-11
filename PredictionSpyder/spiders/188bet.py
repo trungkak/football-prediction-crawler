@@ -28,7 +28,7 @@ class OneEightEightSpider(scrapy.Spider):
 
     def start_requests(self):
         for url in self.start_urls:
-            time.sleep(5)
+            time.sleep(10)
             yield SplashRequest(url, self.parse,
                     endpoint='execute',
                     args={
@@ -66,30 +66,30 @@ class OneEightEightSpider(scrapy.Spider):
                 match_data_json['MATCHNAME']['team2'] = team2_data[0].strip().title()
 
             match_data_json['CATRAN-onextwo'] = {}
-            match_data_json['CATRAN-onextwo']['team1'] = team1_data[1]
-            match_data_json['CATRAN-onextwo']['team2'] = team2_data[1]
-            match_data_json['CATRAN-onextwo']['draw'] = draw_data[1]
+            match_data_json['CATRAN-onextwo']['team1'] = [team1_data[1]]
+            match_data_json['CATRAN-onextwo']['team2'] = [team2_data[1]]
+            match_data_json['CATRAN-onextwo']['draw'] = [draw_data[1]]
 
             match_data_json['CATRAN-handicap'] = {}
-            match_data_json['CATRAN-handicap']['team1'] = team1_data[2]
-            match_data_json['CATRAN-handicap']['team2'] = team2_data[2]
+            match_data_json['CATRAN-handicap']['team1'] = [team1_data[2].split()[0], team1_data[2].split()[1]]
+            match_data_json['CATRAN-handicap']['team2'] = [team2_data[2].split()[0], team2_data[2].split()[1]]
 
             match_data_json['CATRAN-underover'] = {}
-            match_data_json['CATRAN-underover']['team1'] = team1_data[3]
-            match_data_json['CATRAN-underover']['team2'] = team2_data[3]
+            match_data_json['CATRAN-underover']['team1'] = [' '.join(team1_data[3].split()[:2]), team1_data[3].split()[2]]
+            match_data_json['CATRAN-underover']['team2'] = [' '.join(team2_data[3].split()[:2]), team2_data[3].split()[2]]
 
             match_data_json['HIEP1-onextwo'] = {}
-            match_data_json['HIEP1-onextwo']['team1'] = team1_data[1 + 3]
-            match_data_json['HIEP1-onextwo']['team2'] = team2_data[1 + 3]
-            match_data_json['HIEP1-onextwo']['draw'] = draw_data[2]
+            match_data_json['HIEP1-onextwo']['team1'] = [team1_data[1 + 3]]
+            match_data_json['HIEP1-onextwo']['team2'] = [team2_data[1 + 3]]
+            match_data_json['HIEP1-onextwo']['draw'] = [draw_data[2]]
 
             match_data_json['HIEP1-handicap'] = {}
-            match_data_json['HIEP1-handicap']['team1'] = team1_data[2 + 3]
-            match_data_json['HIEP1-handicap']['team2'] = team2_data[2 + 3]
+            match_data_json['HIEP1-handicap']['team1'] = [team1_data[2 + 3].split()[0], team1_data[2 + 3].split()[1]]
+            match_data_json['HIEP1-handicap']['team2'] = [team2_data[2 + 3].split()[0], team2_data[2 + 3].split()[1]]
 
             match_data_json['HIEP1-underover'] = {}
-            match_data_json['HIEP1-underover']['team1'] = team1_data[3 + 3]
-            match_data_json['HIEP1-underover']['team2'] = team2_data[3 + 3]
+            match_data_json['HIEP1-underover']['team1'] = [' '.join(team1_data[3 + 3].split()[:2]), team1_data[3 + 3].split()[2]]
+            match_data_json['HIEP1-underover']['team2'] = [' '.join(team2_data[3 + 3].split()[:2]), team2_data[3 + 3].split()[2]]
 
             match_data_json['DATETIME'] = 'Undefined'
 
