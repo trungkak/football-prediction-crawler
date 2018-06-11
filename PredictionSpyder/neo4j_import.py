@@ -88,15 +88,10 @@ class PredictionDataImport(object):
     def import_keonhacai(self, keonhacai_data):
         match_data = keonhacai_data[0]['data']
 
-        worldcup_real_matches = [('Russia', 'Saudi Arabia'), ('egypt', 'uruguay'), ('morocco', 'iran'), ('portugal', 'spain')]
+        for row in match_data:
 
-        for i, team in enumerate(worldcup_real_matches):
-
-            row = match_data[i]
-            #team1 = row['MATCHNAME'][0][0]
-            #team2 = row['MATCHNAME'][1][0]
-            team1 = team[0]
-            team2 = team[1]
+            team1 = row['MATCHNAME']['team1'][0]
+            team2 = row['MATCHNAME']['team2'][0]
 
             keonhacai_script = """CREATE (bet_odds_prediction:BET_ODDS_PREDICTION 
                             {
@@ -144,6 +139,59 @@ class PredictionDataImport(object):
         except Exception as e:
             print(e)
 
+    def import_188(self, data):
+
+        for row in data:
+
+            team1 = row['MATCHNAME']['team1']
+            team2 = row['MATCHNAME']['team2']
+
+            keonhacai_script = """CREATE (bet_odds_prediction:BET_ODDS_PREDICTION 
+                            {
+                                team1: '%s', 
+                                team2: '%s', 
+                                matchtime: '%s',
+                                chance: '%s', 
+                                dice: '%s', 
+                                onextwo: '%s',
+                                firsthalf_chance: '%s',
+                                firsthalf_dice: '%s',
+                                firsthalf_onextwo: '%s'
+                            })
+                    """ % (team1.title(),
+                           team2.title(),
+                           row['DATETIME'],
+                           json.dumps(row['CATRAN-handicap']),
+                           json.dumps(row['CATRAN-underover']),
+                           json.dumps(row['CATRAN-onextwo']),
+                           json.dumps(row['HIEP1-handicap']),
+                           json.dumps(row['HIEP1-underover']),
+                           json.dumps(row['HIEP1-onextwo']),
+                           )
+
+            try:
+                create_result = self.gdb.query(keonhacai_script, data_contents=True)
+                print(create_result)
+                print("SUCCESSFULLY CREATE KEONHACAI_PREDICTION")
+            except Exception as e:
+                print(e)
+
+        merge_script = """
+                        MATCH (match:MATCH)-[:BELONG_TO]->(tournament:TOURNAMENT), 
+                                (bet_odds_prediction:BET_ODDS_PREDICTION) 
+                            WHERE   match.team1 = bet_odds_prediction.team1 
+                                AND match.team2 = bet_odds_prediction.team2 
+                                AND tournament.name =~ ".*2018.*" 
+                            CREATE (bet_odds_prediction)-[:PREDICT]->(match) 
+                            RETURN bet_odds_prediction, match
+                    """
+        try:
+            merge_results = self.gdb.query(merge_script, data_contents=True)
+            print(merge_results)
+            print("SUCCESSFULLY MERGE BETODDS_PREDICTION TO MATCH")
+        except Exception as e:
+            print(e)
+
 
 if __name__ == '__main__':
     pi = PredictionDataImport("http://10.199.220.179:7474/", "neo4j", "123456")
@@ -153,6 +201,10 @@ if __name__ == '__main__':
     #     data = json.loads(f.read())
     #     pi.import_winner(data)
 
-    with open('../keonhacai.json', 'r') as f:
+    # with open('../keonhacai.json', 'r') as f:
+    #     data = json.loads(f.read())
+    #     pi.import_keonhacai(data)
+
+    with open('../188.json', 'r') as f:
         data = json.loads(f.read())
-        pi.import_keonhacai(data)
+        pi.import_188(data)

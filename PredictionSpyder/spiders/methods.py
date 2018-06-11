@@ -2,7 +2,7 @@
 import pandas as pd
 from scrapy.selector import Selector
 from datetime import datetime
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Comment
 
 
 def get_bet_odds(url_or_source, title):
@@ -151,3 +151,22 @@ def get_keonhacai(source, key_term):
         match_data['data'].append(parse_row(match_row))
 
     return match_data
+
+
+def get_oneeighteight(source, match_name):
+    soup = BeautifulSoup(source, "lxml")
+    bet_tables = soup.find_all("table", class_="bet-types-table")
+
+    matches = []
+
+    names = []
+
+    for bet_table in bet_tables:
+        table_rows = bet_table.find('tbody').find_all('tr', recursive=False)[2:] # Cause 2 first tr is metadata
+        for table_row in table_rows:
+            tds = table_row.find_all('td', recursive=False)
+            # row_data = [td.text for td in tds if td.text.strip() != '']
+            row_data = [' '.join(td.find_all(text=lambda text: not isinstance(text, Comment))) for td in tds if td.text.strip() != '']
+            matches.append(row_data)
+    print('*** ' + match_name + ' ***')
+    return matches
