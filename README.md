@@ -22,10 +22,14 @@
 
 ### Crawl data
 
-If you want to crawl winner prediction from google, you need to enable splash to render javascript
-    
+Firstly, walk into PredictionSpyder and enable Splash
+ 
     $ cd PredictionSpyder
     $ sudo docker run -p 8050:8050 -p 5023:5023 scrapinghub/splash
+
+
+If you want to crawl winner prediction from google, you need to enable splash to render javascript
+    
     $ scrapy crawl winnerspider -o winner.json -t json
 
 ==================================================
@@ -40,12 +44,12 @@ Or keonhacai prediction
 Or 188 bet prediction, to update ALL MATCHES, run
 
     $ cd PredictionSpyder
-    $ scrapy crawl 188spider -o keonhacai.json -t json
+    $ scrapy crawl 188spider -o 188.json -t json
 
 At the time World Cup happens, we could pass a url to crawler
     
     $ cd PredictionSpyder
-    $ scrapy crawl 188spider -a default_url='<https://something.com>' -o keonhacai.json -t json
+    $ scrapy crawl 188spider -a default_url='<https://something.com>' -o 188.json -t json
 
 
     
