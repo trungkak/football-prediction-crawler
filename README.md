@@ -67,3 +67,7 @@ To update google prediction, run
 To update betodds prediction, run
 
     python PredictionSpyder/neo4j_import.py --source 188bet --method update
+
+To update match score, run
+
+    python PredictionSpyder/neo4j_import.py --source matchscore --method update
