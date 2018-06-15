@@ -127,17 +127,15 @@ def parse_row(elem):
 
 
 def get_keonhacai(source, key_term):
-    current_time = datetime.utcnow()
-    current_timestamp = datetime.fromtimestamp(float(current_time.timestamp())).strftime('%Y-%m-%d %H:%M:%S')
-
     # get the main table
     soup = BeautifulSoup(source, "lxml")
-    table = soup.find("table", id="dm3")
+    table = soup.find("table", id="dm2")
 
     # get all table rows at first level
     table_rows = table.find('tbody').find_all('tr', recursive=False)
 
     # find the row contains key term and its index
+    print([row.text.strip() for row in table_rows if len(row.find_all('td')) == 1])
     key_term_row = list(filter(lambda elem: len(elem.find_all('td')) == 1 and elem.text.strip() == key_term, table_rows))[0]
     key_term_row_index = table_rows.index(key_term_row)
 
@@ -145,10 +143,10 @@ def get_keonhacai(source, key_term):
     next_term_row = list(filter(lambda elem: len(elem.find_all('td')) == 1, table_rows[key_term_row_index + 1:]))[0]
     next_term_row_index = table_rows.index(next_term_row)
 
-    match_data = {'timestamp': current_timestamp, 'data': []}
+    match_data = []
 
     for match_row in table_rows[key_term_row_index + 1: next_term_row_index]:
-        match_data['data'].append(parse_row(match_row))
+        match_data.append(parse_row(match_row))
 
     return match_data
 

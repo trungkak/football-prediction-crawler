@@ -110,12 +110,12 @@ class PredictionDataImport(object):
             print(merge_results)
 
     def import_keonhacai(self, data, method):
-        match_data = data[0]['data']
+        match_data = data
 
         for row in match_data:
 
-            team1 = row['MATCHNAME']['team1'][0]
-            team2 = row['MATCHNAME']['team2'][0]
+            team1 = row['MATCHNAME']['team1'][0].strip().title()
+            team2 = row['MATCHNAME']['team2'][0].strip().title()
 
             create_script = """CREATE (bet_odds_prediction:BET_ODDS_PREDICTION 
                             {
@@ -264,6 +264,71 @@ class PredictionDataImport(object):
             except Exception as e:
                 print(e)
 
+    def import_matchscore(self, data, method):
+        match_data = data
+
+        for row in match_data:
+
+            team1 = row['MATCHNAME']['team1'][0].strip().title()
+            team2 = row['MATCHNAME']['team2'][0].strip().title()
+
+            create_script = """CREATE (bet_odds_prediction:BET_ODDS_PREDICTION 
+                            {
+                                team1: '%s', 
+                                team2: '%s', 
+                                matchtime: '%s',
+                                chance: '%s', 
+                                dice: '%s', 
+                                onextwo: '%s',
+                                firsthalf_chance: '%s',
+                                firsthalf_dice: '%s',
+                                firsthalf_onextwo: '%s'
+                            })
+                    """ % (team1.title(),
+                           team2.title(),
+                           row['DATETIME'],
+                           json.dumps(row['CATRAN-TYLE']),
+                           json.dumps(row['CATRAN-TAIXIU']),
+                           json.dumps(row['CATRAN-1X2']),
+                           json.dumps(row['HIEP1-TYLE']),
+                           json.dumps(row['HIEP1-TAIXIU']),
+                           json.dumps(row['HIEP1-1X2']),
+                           )
+
+            matchtime = row['DATETIME']
+            minute = matchtime.split(' ')[-1].strip("'")
+            score = ' '.join(matchtime.split(' ')[:-1])
+            score1, score2 = score.split("-")[0], score.split("-")[1]
+
+            result_fulltime = {}
+            result_fulltime['team1'] = team1.title()
+            result_fulltime['team2'] = team2.title()
+            result_fulltime['score1'] = int(score1)
+            result_fulltime['score2'] = int(score2)
+
+            update_script = """MATCH (match:MATCH)
+                            WHERE match.team1 = '%s' AND match.team2 = '%s' 
+                            SET
+                                match.result_fulltime = '%s',
+                                match.time = '%s' 
+                    """ % (team1.title(),
+                           team2.title(),
+                           json.dumps(result_fulltime),
+                           minute
+                           )
+
+            try:
+                if method == 'create':
+                    print('THIS METHOD DOES NOT ALLOW CREATING')
+                    return None
+
+                if method == 'update':
+                    update_result = self.gdb.query(update_script, data_contents=True)
+                    print(update_result)
+                    print('SUCCESSFULLY UPDATE ON MATCH (%s - %s)' % (team1, team2))
+            except Exception as e:
+                print(e)
+
 
 if __name__ == '__main__':
     pi = PredictionDataImport("http://10.199.220.179:7474/", "neo4j", "123456")
@@ -295,6 +360,11 @@ if __name__ == '__main__':
         with open(os.path.abspath('188.json'), 'r') as f:
             data = json.loads(f.read())
             pi.import_188(data, method)
+
+    elif args.source == 'matchscore':
+        with open(os.path.abspath('keonhacai.json'), 'r') as f:
+            data = json.loads(f.read())
+            pi.import_matchscore(data, method)
 
     else:
         print('Only allow source from [google, keonhacai, 188bet]')
