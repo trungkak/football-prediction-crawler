@@ -18,4 +18,4 @@ class KeoNhaCaiSpider(scrapy.Spider):
 
     def parse(self, response):
         # Change key_term to something like "FIFA WORLD CUP 2018" when it's online
-        return get_keonhacai(response.text, key_term="AUSTRALIA FOOTBALL QUEENSLAND PREMIER LEAGUE")
+        return get_keonhacai(response.text, key_term="*FIFA WORLD CUP 2018 (IN RUSSIA)")

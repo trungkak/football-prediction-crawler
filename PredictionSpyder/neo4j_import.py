@@ -294,17 +294,22 @@ class PredictionDataImport(object):
                            json.dumps(row['HIEP1-TAIXIU']),
                            json.dumps(row['HIEP1-1X2']),
                            )
+            result_fulltime = ''
+            minute = 0
+            try:
+                matchtime = row['DATETIME']
+                minute = matchtime.split(' ')[-1].strip("'")
+                score = ' '.join(matchtime.split(' ')[:-1])
+                score1, score2 = score.split("-")[0], score.split("-")[1]
 
-            matchtime = row['DATETIME']
-            minute = matchtime.split(' ')[-1].strip("'")
-            score = ' '.join(matchtime.split(' ')[:-1])
-            score1, score2 = score.split("-")[0], score.split("-")[1]
-
-            result_fulltime = {}
-            result_fulltime['team1'] = team1.title()
-            result_fulltime['team2'] = team2.title()
-            result_fulltime['score1'] = int(score1)
-            result_fulltime['score2'] = int(score2)
+                result_fulltime = {}
+                result_fulltime['team1'] = team1.title()
+                result_fulltime['team2'] = team2.title()
+                result_fulltime['score1'] = int(score1)
+                result_fulltime['score2'] = int(score2)
+            except:
+                print('TRAN DAU CHUA BAT DAU')
+                continue
 
             update_script = """MATCH (match:MATCH)
                             WHERE match.team1 = '%s' AND match.team2 = '%s' 
@@ -323,6 +328,7 @@ class PredictionDataImport(object):
                     return None
 
                 if method == 'update':
+                    print(update_script)
                     update_result = self.gdb.query(update_script, data_contents=True)
                     print(update_result)
                     print('SUCCESSFULLY UPDATE ON MATCH (%s - %s)' % (team1, team2))
