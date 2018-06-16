@@ -11,7 +11,7 @@ class OneEightEightSpider(scrapy.Spider):
 
     def __init__(self, mode='all_matches', default_url='https://www.188bet.com/vi-vn/world-cup', **kwargs):
         if mode == 'all_matches':
-            self.start_urls = ["https://www.188bet.com/vi-vn/world-cup#06" + str(i) for i in range(14, 30)]
+            self.start_urls = ["https://www.188bet.com/vi-vn/world-cup#06" + str(i) for i in range(16, 18)]
         if mode == 'live_matches':
             self.start_urls = [default_url]
         super().__init__(**kwargs)

@@ -74,11 +74,26 @@ def get_google_winner(source, title):
     except:
         team2_percent = 'ERROR'
 
+    try:
+        soup = BeautifulSoup(source, "lxml")
+        match_time_div = soup.find('div', class_ = "imso_mh__lv-m-stts-cont")
+        match_score_div = soup.find('div', class_ = "imso_mh__ma-sc-cont")
+
+        match_time = ' '.join(match_time_div.find_all(text=True))[:2].strip()
+        match_score = ' '.join(match_score_div.find_all(text=True))[:3]
+    except:
+        match_time = 'ERROR'
+        match_score = 'ERROR'
+
     winning_percents[team1] = team1_percent
     winning_percents['draw'] = draw_percent
     winning_percents[team2] = team2_percent
     winning_percents['first_team'] = team1
     winning_percents['second_team'] = team2
+
+    if match_score != 'ERROR' and match_time != 'ERROR':
+        winning_percents['match_score'] = match_score
+        winning_percents['match_time'] = match_time
 
     return winning_percents
 

@@ -269,38 +269,14 @@ class PredictionDataImport(object):
 
         for row in match_data:
 
-            team1 = row['MATCHNAME']['team1'][0].strip().title()
-            team2 = row['MATCHNAME']['team2'][0].strip().title()
+            team1 = row['first_team'].strip().title()
+            team2 = row['second_team'].strip().title()
 
-            create_script = """CREATE (bet_odds_prediction:BET_ODDS_PREDICTION 
-                            {
-                                team1: '%s', 
-                                team2: '%s', 
-                                matchtime: '%s',
-                                chance: '%s', 
-                                dice: '%s', 
-                                onextwo: '%s',
-                                firsthalf_chance: '%s',
-                                firsthalf_dice: '%s',
-                                firsthalf_onextwo: '%s'
-                            })
-                    """ % (team1.title(),
-                           team2.title(),
-                           row['DATETIME'],
-                           json.dumps(row['CATRAN-TYLE']),
-                           json.dumps(row['CATRAN-TAIXIU']),
-                           json.dumps(row['CATRAN-1X2']),
-                           json.dumps(row['HIEP1-TYLE']),
-                           json.dumps(row['HIEP1-TAIXIU']),
-                           json.dumps(row['HIEP1-1X2']),
-                           )
-            result_fulltime = ''
-            minute = 0
             try:
-                matchtime = row['DATETIME']
-                minute = matchtime.split(' ')[-1].strip("'")
-                score = ' '.join(matchtime.split(' ')[:-1])
-                score1, score2 = score.split("-")[0], score.split("-")[1]
+                match_time = row['match_time']
+
+                match_score = row['match_score']
+                score1, score2 = match_score.split()
 
                 result_fulltime = {}
                 result_fulltime['team1'] = team1.title()
@@ -319,7 +295,7 @@ class PredictionDataImport(object):
                     """ % (team1.title(),
                            team2.title(),
                            json.dumps(result_fulltime),
-                           minute
+                           match_time
                            )
 
             try:
@@ -368,7 +344,7 @@ if __name__ == '__main__':
             pi.import_188(data, method)
 
     elif args.source == 'matchscore':
-        with open(os.path.abspath('keonhacai.json'), 'r') as f:
+        with open(os.path.abspath('winner.json'), 'r') as f:
             data = json.loads(f.read())
             pi.import_matchscore(data, method)
 
