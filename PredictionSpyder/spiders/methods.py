@@ -74,6 +74,11 @@ def get_google_winner(source, title):
     except:
         team2_percent = 'ERROR'
 
+    team_lineup = {
+        'team1': {},
+        'team2': {}
+    }
+
     try:
         soup = BeautifulSoup(source, "lxml")
         match_time_div = soup.find('div', class_ = "imso_mh__lv-m-stts-cont")
@@ -81,6 +86,25 @@ def get_google_winner(source, title):
 
         match_time = ' '.join(match_time_div.find_all(text=True))[:2].strip()
         match_score = ' '.join(match_score_div.find_all(text=True))[:3]
+
+        lineups_div = soup.find('div', class_="lineup-section")
+
+        if lineups_div:
+            try:
+                all_players = ' '.join([div.text for div in soup.find_all('span', class_="jersey-num-cell")])
+                team_lineup['team1']['players'] = all_players.split()[:11]
+                team_lineup['team2']['players'] = all_players.split()[11:]
+
+                print(team_lineup['team1']['players'])
+                print(team_lineup['team2']['players'])
+
+                all_formations = ' '.join(
+                    [div.text for div in soup.find_all('span', class_="oEwJQ tBpa2 text-middle formation")])
+                print(all_formations)
+                team_lineup['team1']['lineup'] = all_formations.split()[0]
+                team_lineup['team2']['lineup'] = all_formations.split()[1]
+            except:
+                print('MATCH NOT STARTED')
     except:
         match_time = 'ERROR'
         match_score = 'ERROR'
@@ -94,6 +118,9 @@ def get_google_winner(source, title):
     if match_score != 'ERROR' and match_time != 'ERROR':
         winning_percents['match_score'] = match_score
         winning_percents['match_time'] = match_time
+
+    if team_lineup['team1'] != {}:
+        winning_percents['lineups'] = team_lineup
 
     return winning_percents
 
