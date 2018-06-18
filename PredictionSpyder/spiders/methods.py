@@ -79,35 +79,34 @@ def get_google_winner(source, title):
         'team2': {}
     }
 
+    soup = BeautifulSoup(source, "lxml")
     try:
-        soup = BeautifulSoup(source, "lxml")
         match_time_div = soup.find('div', class_ = "imso_mh__lv-m-stts-cont")
         match_score_div = soup.find('div', class_ = "imso_mh__ma-sc-cont")
 
         match_time = ' '.join(match_time_div.find_all(text=True))[:2].strip()
         match_score = ' '.join(match_score_div.find_all(text=True))[:3]
-
-        lineups_div = soup.find('div', class_="lineup-section")
-
-        if lineups_div:
-            try:
-                all_players = ' '.join([div.text for div in soup.find_all('span', class_="jersey-num-cell")])
-                team_lineup['team1']['players'] = all_players.split()[:11]
-                team_lineup['team2']['players'] = all_players.split()[11:]
-
-                print(team_lineup['team1']['players'])
-                print(team_lineup['team2']['players'])
-
-                all_formations = ' '.join(
-                    [div.text for div in soup.find_all('span', class_="oEwJQ tBpa2 text-middle formation")])
-                print(all_formations)
-                team_lineup['team1']['lineup'] = all_formations.split()[0]
-                team_lineup['team2']['lineup'] = all_formations.split()[1]
-            except:
-                print('MATCH NOT STARTED')
     except:
         match_time = 'ERROR'
         match_score = 'ERROR'
+
+    try:
+        lineups_div = soup.find('div', class_="lineup-section")
+        all_players = ' '.join([div.text for div in soup.find_all('span', class_="jersey-num-cell")])
+        team_lineup['team1']['players'] = all_players.split()[:11]
+        team_lineup['team2']['players'] = all_players.split()[11:]
+
+        print(team_lineup['team1']['players'])
+        print(team_lineup['team2']['players'])
+
+        all_formations = ' '.join(
+            [div.text for div in soup.find_all('span', class_="oEwJQ tBpa2 text-middle formation")])
+        print(all_formations)
+        team_lineup['team1']['lineup'] = all_formations.split()[0]
+        team_lineup['team2']['lineup'] = all_formations.split()[1]
+    except:
+        print('MATCH NOT STARTED')
+
 
     winning_percents[team1] = team1_percent
     winning_percents['draw'] = draw_percent
@@ -210,3 +209,9 @@ def get_oneeighteight(source, match_name):
             matches.append(row_data)
     print('*** ' + match_name + ' ***')
     return matches
+
+
+if __name__ == '__main__':
+    with open('/home/cpu10001-local/workspace/PredictionSpyder/source.html') as f:
+        source = f.read()
+    print(get_google_winner(source, 'brazil-v-sweden'))
