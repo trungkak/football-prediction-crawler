@@ -39,6 +39,7 @@ class AmazonSpider(scrapy.Spider):
 
     def parse(self, response):
 
+        # extract and print out image urls
         img_urls = response.xpath('//*[@id="result_1"]/div/div[2]/div/div/a/img').extract()
         
         for img_url in img_urls:
